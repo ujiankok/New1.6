@@ -1,56 +1,39 @@
-import threading
-
-from sqlalchemy import TEXT, Column, Numeric, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session, sessionmaker
-
-from config import DB_URI
+#(©)CodeXBotz
 
 
-def start() -> scoped_session:
-    engine = create_engine(DB_URI, client_encoding="utf8")
-    BASE.metadata.bind = engine
-    BASE.metadata.create_all(engine)
-    return scoped_session(sessionmaker(bind=engine, autoflush=False))
 
 
-BASE = declarative_base()
-SESSION = start()
-
-INSERTION_LOCK = threading.RLock()
+import pymongo, os
+from config import DB_URI, DB_NAME
 
 
-class Broadcast(BASE):
-    __tablename__ = "broadcast"
-    id = Column(Numeric, primary_key=True)
-    user_name = Column(TEXT)
-
-    def __init__(self, id, user_name):
-        self.id = id
-        self.user_name = user_name
+dbclient = pymongo.MongoClient(DB_URI)
+database = dbclient[DB_NAME]
 
 
-Broadcast.__table__.create(checkfirst=True)
+user_data = database['users']
 
 
-#  Add user details -
-async def add_user(id, user_name):
-    with INSERTION_LOCK:
-        msg = SESSION.query(Broadcast).get(id)
-        if not msg:
-            usr = Broadcast(id, user_name)
-            SESSION.add(usr)
-            SESSION.commit()
 
+async def present_user(user_id : int):
+    found = user_data.find_one({'_id': user_id})
+    if found:
+        return True
+    else:
+        return False
+
+async def add_user(user_id: int):
+    user_data.insert_one({'_id': user_id})
+    return
 
 async def full_userbase():
-    users = SESSION.query(Broadcast).all()
-    SESSION.close()
-    return users
+    user_docs = user_data.find()
+    user_ids = []
+    for doc in user_docs:
+        user_ids.append(doc['_id'])
+        
+    return user_ids
 
-
-async def query_msg():
-    try:
-        return SESSION.query(Broadcast.id).order_by(Broadcast.id)
-    finally:
-        SESSION.close()
+async def del_user(user_id: int):
+    user_data.delete_one({'_id': user_id})
+    return
