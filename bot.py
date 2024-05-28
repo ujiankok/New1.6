@@ -212,7 +212,9 @@ class Bot(Client):
                 "Bot Berhenti. Gabung Group https://t.me/SharingUserbot untuk Bantuan"
             )
             sys.exit()
-
+            
+        self.username = usr_bot_me.username
+        
         self.LOGGER(__name__).info(
             f"[🔥 BERHASIL DIAKTIFKAN! 🔥]\nBOT Dibuat oleh @{OWNER}\nJika @{OWNER} Membutuhkan Bantuan, Silahkan Tanyakan di Grup https://t.me/SharingUserbot"
         )
