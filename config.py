@@ -31,6 +31,7 @@ HEROKU_API_KEY = os.environ.get("HEROKU_API_KEY", None)
 
 # Database
 DB_URI = os.environ.get("DATABASE_URL", "")
+DB_NAME = os.environ.get("DATABASE_NAME", "filesharexbot")
 
 PROTECT_CONTENT = strtobool(os.environ.get("PROTECT_CONTENT", "False"))
 
